@@ -1,0 +1,44 @@
+#!/bin/sh
+
+build_site() {
+    MDBOOK_SITE_PATH="$1"
+    MDBOOK_CLONE_URI="$2"
+    MDBOOK_SERVE_PATH="$3"
+    # Does the mdbook content path exist
+    if [ ! -d "$MDBOOK_SITE_PATH" ] ; then
+        mkdir -p "$MDBOOK_SITE_PATH"
+    fi
+
+    # Jump into the content path
+    cd "$MDBOOK_SITE_PATH" || { echo >&2 "Could not cd into content path: ${MDBOOK_SITE_PATH}"; exit 1; }
+
+    # If we have .git update, otherwise clone
+    if [ -d .git ] ; then
+        git pull
+    else
+        git clone "$MDBOOK_CLONE_URI" .
+    fi
+
+    # Submodules?
+    if [ -f .gitmodules ] ; then
+        git submodule update --init
+    fi
+
+    # Build destdir if it doesn't exist
+    if [ ! -d "$MDBOOK_SERVE_PATH" ] ; then
+        mkdir -p "$MDBOOK_SERVE_PATH"
+    fi
+
+    # build
+    mdbook build
+
+    # Deploy the site
+    rsync -a book/ "$MDBOOK_SERVE_PATH"
+
+    # Fix the system permissions
+    chmod og+rX "$MDBOOK_SERVE_PATH"
+}
+
+{% for site in mdbook_sites %}
+build_site "/opt/var/mdbook/{{ site.name }}" "{{ site.source_url }}" "{{ site.root_path}}"
+{% endfor %}

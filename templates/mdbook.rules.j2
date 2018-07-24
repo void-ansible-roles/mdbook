@@ -1,0 +1,12 @@
+*filter
+-A OUTPUT -p tcp --dport 80 -j ACCEPT
+{% set ssl_done = false %}
+{% for item in mdbook_sites %}
+-A OUTPUT -p tcp -d {{ item.source_host | default("github.com") }} --dport {{ item.source_port | default("443") }} -j ACCEPT
+
+{% if item.use_ssl and ssl_done == false %}
+{% set ssl_done = true %}
+-A INPUT -p tcp --dport 443 -j ACCEPT
+{% endif %}
+{% endfor %}
+COMMIT

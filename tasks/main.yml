@@ -1,0 +1,42 @@
+---
+- name: Install dependencies
+  xbps:
+    pkg:
+      - git
+      - mdBook
+      - rsync
+    state: present
+
+- name: Install firewall rules
+  template:
+    src: mdbook.rules.j2
+    dest: /etc/iptables.d/mdbook.rules
+    owner: root
+    group: root
+    mode: 0640
+  notify:
+    - iptables
+
+- name: Configure Webserver
+  include_role:
+    name: nginx
+    tasks_from: base-site
+  with_items: "{{ mdbook_sites }}"
+  vars:
+    - site: "{{ item }}"
+
+- name: Install site build script
+  template:
+    src: mdbook_build.sh.j2
+    dest: /usr/local/sbin/mdbook-build
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Add cron job for site
+  template:
+    src: mdbook_build.cron.j2
+    dest: /etc/cron.d/mdbook_build
+    owner: root
+    group: root
+    mode: 0644
