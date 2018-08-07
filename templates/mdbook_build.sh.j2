@@ -4,6 +4,8 @@ build_site() {
     MDBOOK_SITE_PATH="$1"
     MDBOOK_CLONE_URI="$2"
     MDBOOK_SERVE_PATH="$3"
+    MDBOOK_SRC_PATH="$4"
+
     # Does the mdbook content path exist
     if [ ! -d "$MDBOOK_SITE_PATH" ] ; then
         mkdir -p "$MDBOOK_SITE_PATH"
@@ -21,7 +23,7 @@ build_site() {
 
     # Submodules?
     if [ -f .gitmodules ] ; then
-        git submodule update --init
+        yes | git submodule update --init
     fi
 
     # Build destdir if it doesn't exist
@@ -30,6 +32,7 @@ build_site() {
     fi
 
     # build
+    cd "$MDBOOK_SRC_PATH" || { echo >&2 "Could not cd into source subdir: ${MDBOOK_SRC_PATH}"; exit 2; }
     mdbook build
 
     # Deploy the site
@@ -40,5 +43,5 @@ build_site() {
 }
 
 {% for site in mdbook_sites %}
-build_site "/opt/var/mdbook/{{ site.name }}" "{{ site.source_url }}" "{{ site.root_path}}"
+build_site "/opt/var/mdbook/{{ site.name }}" "{{ site.source_url }}" "{{ site.root_path}}" "{{ site.source_dir | default('.') }}"
 {% endfor %}

@@ -25,6 +25,7 @@ Variables Required:
     site_path: where to serve the site from
     site_url: the url of the site
     source_url: a git repo containing the site
+    source_dir: a subdirectory containing docs
     source_host: the host of the git repository
     source_port: the port to connect to on the host containing the jekyll source material
     ssl_certificate_path: if using ssl, this must be the path to the certificate's full chain
