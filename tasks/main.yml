@@ -19,7 +19,7 @@
 
 - name: Configure Webserver
   include_role:
-    name: nginx
+    name: "{{ VAR_webserver | default('nginx') }}"
     tasks_from: base-site
   with_items: "{{ mdbook_sites }}"
   vars:
