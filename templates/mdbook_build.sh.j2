@@ -36,7 +36,7 @@ build_site() {
     mdbook build
 
     # Deploy the site
-    rsync -a book/ "$MDBOOK_SERVE_PATH"
+    rsync -a --delete book/ "$MDBOOK_SERVE_PATH"
 
     # Fix the system permissions
     chmod og+rX "$MDBOOK_SERVE_PATH"
