@@ -33,10 +33,14 @@ build_site() {
 
     # build
     cd "$MDBOOK_SRC_PATH" || { echo >&2 "Could not cd into source subdir: ${MDBOOK_SRC_PATH}"; exit 2; }
+    rm -rf book/
     mdbook build
 
     # Deploy the site
-    rsync -a --delete book/ "$MDBOOK_SERVE_PATH"
+    MDBOOK_BUILD_PATH="book/"
+    [ -d "$MDBOOK_BUILD_PATH/html" ] && MDBOOK_BUILD_PATH="$MDBOOK_BUILD_PATH/html/"
+
+    rsync -a --delete "$MDBOOK_BUILD_PATH" "$MDBOOK_SERVE_PATH"
 
     # Fix the system permissions
     chmod og+rX "$MDBOOK_SERVE_PATH"
